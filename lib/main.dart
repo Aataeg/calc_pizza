@@ -8,8 +8,6 @@ void main() {
   runApp(const CalcPizza());
 }
 
-double? price = 300.00;
-
 class CalcPizza extends StatefulWidget {
   const CalcPizza({Key? key}) : super(key: key);
 
@@ -18,11 +16,31 @@ class CalcPizza extends StatefulWidget {
 }
 
 class _CalcPizzaState extends State<CalcPizza> {
-  double _sliderValue = 30.00;
+  int _price = 300;
+  double _sliderValue = 30.0;
   bool _cheese = false;
-  int? groupValue;
-  static const List<String> testo = <String>['Обычное тесто','Тонкое тесто'];
-  static const List<String> sauces = <String>['Острый','Кисло-сладкий','Сырный'];
+  int? _groupValue = 0;
+  int _doughIndex = 0;
+
+
+  static const List<String> _doughList = <String>['Обычное тесто','Тонкое тесто'];
+  static const List<String> _sauces = <String>['Острый','Кисло-сладкий','Сырный'];
+
+  int? _calcPrice() {
+    _price = 300;
+    if (_doughIndex == 1) {_price += 50;}
+    if (_cheese == true) {_price += 50;}
+    switch (_sliderValue.toString()){
+     case '45.0': { _price += 100;} break;
+     case '60.0': { _price += 200;} break;
+   }
+    switch (_groupValue){
+      case 1: {_price += 15;} break;
+      case 2: {_price += 20;} break;
+    }
+
+  return _price.round();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,8 +51,6 @@ class _CalcPizzaState extends State<CalcPizza> {
     );
 
 
-
-
     return MaterialApp(
       home: Scaffold(
         body: Center(
@@ -42,9 +58,9 @@ class _CalcPizzaState extends State<CalcPizza> {
             children: [
               Container(
                alignment: Alignment.topRight,
-               child: SizedBox(width: 232, height: 123, child:  const Image(image: AssetImage('assets/files/pizza1.png'),),),
+               child: const SizedBox(width: 232, height: 123, child:  Image(image: AssetImage('assets/files/pizza1.png'),),),
               ),
-              const SizedBox(height: 25,),
+              const SizedBox(height: 20,),
               const SizedBox(height: 36, width: 300, child: Text('Калькулятор пиццы', style: TextStyle(
                 fontSize: 30, fontWeight: FontWeight.w600, color: Colors.black, fontFamily: 'Inter', fontStyle: FontStyle.normal,
               ),),),
@@ -52,39 +68,43 @@ class _CalcPizzaState extends State<CalcPizza> {
               const SizedBox(height: 20, width: 179, child: Text('Выберите параметры:', style: TextStyle(
                 fontSize: 16, fontWeight: FontWeight.w600, color: Colors.black, fontFamily: 'Inter',
               ),),),
-              SizedBox(height: 33,),
+              const SizedBox(height: 20,),
               ToggleSwitch(
                 minWidth: 150.0,
                 minHeight: 34.0,
                 cornerRadius: 36.0,
-                activeBgColors: const [const [Color(0xFF0079D0)], const [Color(0xFF0079D0)]],
+                activeBgColors: const [[Color(0xFF0079D0)], [Color(0xFF0079D0)]],
                 activeFgColor: Colors.white,
-                inactiveBgColor: Color(0xFFECEFF1),
-                inactiveFgColor: Color.fromRGBO(0, 0, 0, 0.4),
-                initialLabelIndex: 0,
+                inactiveBgColor: const Color(0xFFECEFF1),
+                inactiveFgColor: const Color.fromRGBO(0, 0, 0, 0.4),
+                initialLabelIndex: _doughIndex,
                 totalSwitches: 2,
                 fontSize: 16,
-                labels: testo,
+                labels: _doughList,
                 radiusStyle: true,
                 onToggle: (int index) {
-
+                 setState(() {
+                   _doughIndex = index;
+                   _calcPrice();
+                 });
                 },
               ),
-              SizedBox(height: 19,),
+              const SizedBox(height: 15,),
               const SizedBox(height: 21, width: 300, child: Text('Размер:', style: TextStyle(
                     fontSize: 18, fontWeight: FontWeight.w400, color: Color(0xFF000000), letterSpacing: -0.3,
                   ),),
 
                   ),
-              SizedBox(height: 5,),
+              const SizedBox(height: 5,),
               SizedBox(
                 width: 300,
                 child: Stack(
                   children: [
                     const SizedBox(
                       width: 300,
-                      height: 30,
+                      height: 27,
                       child: TextField(
+                        textAlign: TextAlign.center,
                         decoration: InputDecoration(
                           filled: true,
                           fillColor: Color(0xFFECEFF1),
@@ -99,19 +119,25 @@ class _CalcPizzaState extends State<CalcPizza> {
                         value: _sliderValue,
                         onChanged: (dynamic value) { setState(() {
                           _sliderValue = value;
+                          _calcPrice();
                         });},
-                        min: 30.00,
-                        max: 60.00,
-                        interval: 15.00,
-                        stepSize: 15.00,
+                        min: 30,
+                        max: 60,
+                        interval: 15,
+                        stepSize: 15,
                         showDividers: true,
-                        enableTooltip: true,
+                        showTicks: true,
+                        labelFormatterCallback: (dynamic actualValue, String formattedText) {
+                          return actualValue.round().toString() +' см';
+                        },
+                        showLabels: true,
+                        labelPlacement: LabelPlacement.onTicks,
                       ),
                     ),
                   ],
                 ),
               ),
-//              SizedBox(height: 5,),
+              const SizedBox(height: 18,),
               const SizedBox(height: 20, width: 300, child: Text('Соус:',style: TextStyle(
                 fontSize: 18, fontWeight: FontWeight.w600, color: Colors.black, fontFamily: 'Inter',
               ),),),
@@ -136,26 +162,27 @@ class _CalcPizzaState extends State<CalcPizza> {
                         contentPadding: const EdgeInsets.all(0.00),
                         value: index,
                         controlAffinity: ListTileControlAffinity.trailing,
-                        groupValue: groupValue,
+                        groupValue: _groupValue,
                         activeColor: const Color(0xFF5DB075),
                         dense: true,
-                        title: Text(sauces[index], style: const TextStyle(
+                        title: Text(_sauces[index], style: const TextStyle(
                         fontSize: 16, fontWeight: FontWeight.w500, color: Colors.black, fontFamily: 'Inter',
                         ),),
                         onChanged: (int? value) {
                           setState(() {
-                            groupValue = value;
+                            _groupValue = value;
+                            _calcPrice();
                           });
                         },
                       ),
 
                     ]);
                   },
-                  itemCount: sauces.length,
+                  itemCount: _sauces.length,
                 ),
 
               ),
-              SizedBox(height: 10,),
+              const SizedBox(height: 15,),
              Row(
                mainAxisAlignment: MainAxisAlignment.center,
                children: [
@@ -164,20 +191,21 @@ class _CalcPizzaState extends State<CalcPizza> {
                    height: 56,
                    child: Card(
                      margin: EdgeInsets.zero,
-                     color: Color(0xFFF0F0F0),
+                     color: const Color(0xFFF0F0F0),
                      child: Row(
                        children: [
                          SizedBox(width: 300, height: 60, child: SwitchListTile(
-                           contentPadding: EdgeInsets.fromLTRB(5, 0, 0, 0),
+                           contentPadding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
                            title: const Text('Дополнительный сыр:',style: TextStyle(
                              fontSize: 15, fontWeight: FontWeight.w400, color: Colors.black,
                              backgroundColor: Color(0xFFF0F0F0),fontFamily: 'Inter',
                            ),),
                            value: _cheese,
-                           secondary: Image(image: AssetImage('assets/files/pizza-min.png'),),
+                           secondary: const Image(image: AssetImage('assets/files/pizza-min.png'),),
                            onChanged: (bool value) {
                              setState(() {
                                _cheese = value;
+                               _calcPrice();
                              });
                            },
                          ),),
@@ -188,14 +216,14 @@ class _CalcPizzaState extends State<CalcPizza> {
 
                ],
              ),
-              SizedBox(height: 10,),
+              const SizedBox(height: 10,),
               const SizedBox(height: 21, width: 300, child: Text('Стоимость:', style: TextStyle(
                 fontSize: 18, fontWeight: FontWeight.w400, color: Color(0xFF000000),
               ),),),
-              SizedBox(height: 10,),
+              const SizedBox(height: 10,),
               Stack(
-                children: const [
-                  SizedBox(
+                children: [
+                  const SizedBox(
                   width: 300,
                   height: 34,
                   child: TextField(
@@ -212,25 +240,20 @@ class _CalcPizzaState extends State<CalcPizza> {
                 SizedBox(
                   width: 300,
                   height: 34,
-                  child: TextField(
-                    decoration: InputDecoration(
-                      filled: true,
-                      enabledBorder: borderStyle,
-                      focusedBorder: borderStyle,
-                    ),
-                    enabled: false,
+                  child: Text("$_price руб.", style: const TextStyle(fontSize: 28,
+                  ), textAlign: TextAlign.center,
                   ),
                 ),
                 ]
               ),
 
-              SizedBox(height: 25,),
+              const SizedBox(height: 25,),
               SizedBox(height: 42, width: 154,
                   child: ElevatedButton( onPressed: () {},
                     child: const Text('Заказать', style: TextStyle(
                       fontSize: 16, fontWeight: FontWeight.w500,),),
                     style: ElevatedButton.styleFrom(
-                      primary: Color(0xFF0079D0),
+                      primary: const Color(0xFF0079D0),
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(22.0)
                       ),
